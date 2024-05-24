@@ -1,9 +1,14 @@
 import streamlit as st
 import pandas as pd
 import openai
-from openai.error import OpenAIError, RateLimitError
 import pickle
 import time
+
+try:
+    import openai
+    from openai.error import OpenAIError, RateLimitError
+except ImportError as e:
+    st.error(f"Error importing OpenAI package: {e}. Please ensure it is installed.")
 
 # Set up the page configuration
 st.set_page_config(
