@@ -3,7 +3,6 @@ import pandas as pd
 import openai
 from openai.error import OpenAIError, RateLimitError
 import pickle
-import streamlit.components.v1 as components
 import time
 
 # Set up the page configuration
