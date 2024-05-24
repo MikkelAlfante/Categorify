@@ -5,11 +5,6 @@ import pickle
 import time
 from openai.error import OpenAIError, RateLimitError
 
-try:
-    import openai
-    from openai.error import OpenAIError, RateLimitError
-except ImportError as e:
-    st.error(f"Error importing OpenAI package: {e}. Please ensure it is installed.")
 
 # Set up the page configuration
 st.set_page_config(
@@ -50,7 +45,7 @@ def get_gpt3_5_turbo_assessment(text, category, api_key):
         st.error(f"An error occurred: {e}")
         return None
 
-# Load the pre-trained model
+# Load the trained model
 with open('text_classifier_bbc.pkl', 'rb') as file:
     model = pickle.load(file)
 
@@ -81,7 +76,7 @@ if st.session_state.get('api_key_confirmed'):
     st.title("Categorify: Text Categorization App")
 
     # Introductory message
-    st.write("Welcome to Categorify, your tool for text categorization. Enter text to classify it into predefined categories using a pre-trained model and get an assessment from GPT-3.5 Turbo.")
+    st.write("Welcome to Categorify, your tool for text categorization. Enter text to classify it into predefined categories using a trained model and get an assessment from GPT-3.5 Turbo.")
 
     # Text input
     st.subheader("Enter your text here:")
@@ -95,16 +90,16 @@ if st.session_state.get('api_key_confirmed'):
         if user_input:
             with st.spinner('Categorizing...'):
                 loading_container.image("loading.gif")  # Display the loading GIF
-                # Pre-trained model prediction
-                pre_trained_prediction = model.predict([user_input])[0]
+                # Trained model prediction
+                trained_prediction = model.predict([user_input])[0]
                 # ChatGPT assessment
-                chatgpt_assessment = get_gpt3_5_turbo_assessment(user_input, pre_trained_prediction, st.session_state.api_key_input)
+                chatgpt_assessment = get_gpt3_5_turbo_assessment(user_input, trained_prediction, st.session_state.api_key_input)
 
                 # Clear the loading GIF
                 loading_container.empty()
 
                 # Display predictions and assessment
-                st.subheader(f"Pre-trained Model Prediction: {pre_trained_prediction}")
+                st.subheader(f"Trained Model Prediction: {trained_prediction}")
                 if chatgpt_assessment:
                     st.subheader("ChatGPT Assessment:")
                     st.write(chatgpt_assessment)
@@ -125,11 +120,11 @@ if st.session_state.get('api_key_confirmed'):
             if st.button("Categorize Uploaded Data"):
                 with st.spinner('Categorizing...'):
                     loading_container.image("loading.gif")  # Display the loading GIF
-                    # Pre-trained model predictions
-                    user_data['pre_trained_category'] = user_data['text'].apply(lambda x: model.predict([x])[0])
+                    # Trained model predictions
+                    user_data['trained_category'] = user_data['text'].apply(lambda x: model.predict([x])[0])
                     # ChatGPT assessments
                     user_data['chatgpt_assessment'] = user_data.apply(
-                        lambda row: get_gpt3_5_turbo_assessment(row['text'], row['pre_trained_category'], st.session_state.api_key_input),
+                        lambda row: get_gpt3_5_turbo_assessment(row['text'], row['trained_category'], st.session_state.api_key_input),
                         axis=1
                     )
 

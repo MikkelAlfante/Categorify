@@ -2,17 +2,60 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pickle
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 # Load the dataset from the CSV file
-file_path = r'C:\Users\User\Downloads\Applied AI\archive (9)\bbc-text.csv'
+file_path = r'C:\Users\User\Downloads\Applied AI\CSV Files\bbc-text.csv'
 df = pd.read_csv(file_path)
+
+# Data cleaning function
+def clean_text(text):
+    # Lowercase the text
+    text = text.lower()
+    # Remove punctuation
+    text = re.sub(r'[^\w\s]', '', text)
+    # Remove numbers
+    text = re.sub(r'\d+', '', text)
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    word_tokens = word_tokenize(text)
+    text = ' '.join([word for word in word_tokens if word not in stop_words])
+    return text
+
+# Apply the cleaning function to the text column
+df['text'] = df['text'].apply(clean_text)
+
+# Split the dataset into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(df['text'], df['category'], test_size=0.2, random_state=42)
 
 # Create a model pipeline
 model = make_pipeline(TfidfVectorizer(), MultinomialNB())
 
 # Train the model
-model.fit(df['text'], df['category'])
+model.fit(X_train, y_train)
+
+# Predict the categories for the test set
+y_pred = model.predict(X_test)
+
+# Calculate the accuracy score
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
+# Generate and display the confusion matrix
+conf_matrix = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(10, 7))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=model.classes_, yticklabels=model.classes_)
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
 
 # Save the model
 with open('text_classifier_bbc.pkl', 'wb') as file:
