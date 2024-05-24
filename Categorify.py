@@ -3,6 +3,7 @@ import pandas as pd
 import openai
 import pickle
 import time
+from openai.error import OpenAIError, RateLimitError
 
 try:
     import openai
